@@ -8,6 +8,7 @@ use App\Models\Event;
 class EventController extends Controller
 {
 
+//save   
 public function store(Request $request)
 {
     $request->validate([
@@ -77,8 +78,6 @@ public function update(Request $request, $id)
 
 
 //delete
-// EventController.php
-
 public function destroy($id)
 {
     $event = Event::find($id);
