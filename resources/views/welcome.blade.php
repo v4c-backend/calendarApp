@@ -6,24 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Event Calendar</title>
 
-    <!-- Include FullCalendar Stylesheet -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.0/main.min.css" rel="stylesheet" />
-
-    <!-- Include jQuery (necessary for FullCalendar and AJAX integration) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Include FullCalendar Script -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.0/main.min.js"></script>
 
     <style>
-        /* Add some basic styling for the calendar */
-        #calendar {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 10px;
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
         }
 
-        /* Add some basic styling for the modal */
+        h1 {
+            text-align: center;
+            color: #058b63;
+            font-size: 2.5rem;
+            margin-top: 20px;
+            font-family: 'Helvetica', sans-serif;
+            font-weight: bold;
+        }
+
+        #calendar {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 0;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
         #eventModal {
             position: fixed;
             top: 0;
@@ -34,26 +47,71 @@
             display: none;
             justify-content: center;
             align-items: center;
+            z-index: 9999;
         }
 
         #eventModal form {
-            background-color: white;
+            background-color: #ffffff;
             padding: 20px;
-            border-radius: 8px;
-            width: 300px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #eventModal form label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        #eventModal form input,
+        #eventModal form textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+        }
+
+        #eventModal form button {
+            padding: 10px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #eventModal form button[type="submit"] {
+            background-color: #058b63;
+            color: white;
+            font-weight: bold;
+        }
+
+        #eventModal form button[type="submit"]:hover {
+            background-color: #046c4b;
         }
 
         #deleteEventBtn {
-            background-color: red;
+            background-color: #ff4d4d;
             color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            margin-top: 10px;
+            font-weight: bold;
         }
 
         #deleteEventBtn:hover {
-            background-color: darkred;
+            background-color: #cc0000;
+        }
+
+        #closeModalBtn {
+            background-color: #cccccc;
+            color: #333333;
+            font-weight: bold;
+        }
+
+        #closeModalBtn:hover {
+            background-color: #aaaaaa;
         }
     </style>
 </head>
@@ -61,46 +119,46 @@
 
     <h1>Event Calendar</h1>
 
-    <!-- FullCalendar container -->
     <div id="calendar"></div>
 
-    <!-- Modal for adding or editing events -->
     <div id="eventModal">
         <form id="eventForm">
             <label for="eventName">Event Name:</label>
-            <input type="text" id="eventName" name="eventName" required><br>
+            <input type="text" id="eventName" name="eventName" required>
 
             <label for="start_time">Start Time:</label>
-            <input type="datetime-local" id="start_time" name="start_time" required><br>
+            <input type="datetime-local" id="start_time" name="start_time" required>
 
             <label for="end_time">End Time:</label>
-            <input type="datetime-local" id="end_time" name="end_time" required><br>
+            <input type="datetime-local" id="end_time" name="end_time" required>
 
             <label for="description">Description:</label>
-            <textarea id="description" name="description"></textarea><br>
+            <textarea id="description" name="description" rows="3"></textarea>
 
             <input type="hidden" id="eventId" name="eventId">
-            <button type="submit">Save Event</button>
-            <button type="button" id="deleteEventBtn" style="display:none;">Delete Event</button>
+            
+            <div style="display: flex; justify-content: space-between; gap: 10px;">
+                <button type="submit">Save Event</button>
+                <button type="button" id="deleteEventBtn" style="display:none;">Delete Event</button>
+                <button type="button" id="closeModalBtn">Cancel</button>
+            </div>
         </form>
     </div>
 
     <script>
-        $(document).ready(function() {
-            // Initialize FullCalendar using the correct syntax for FullCalendar 5.x
+        $(document).ready(function () {
             var calendar = new FullCalendar.Calendar($('#calendar')[0], {
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'month,agendaWeek,agendaDay'
                 },
-                events: function(fetchInfo, successCallback, failureCallback) {
-                    // Fetch events from the backend API
+                events: function (fetchInfo, successCallback, failureCallback) {
                     $.ajax({
-                        url: "/api/events",  // API route to fetch events
+                        url: "/api/events",
                         dataType: 'json',
-                        success: function(data) {
-                            var events = data.map(function(event) {
+                        success: function (data) {
+                            var events = data.map(function (event) {
                                 return {
                                     title: event.name,
                                     start: event.start_time,
@@ -109,35 +167,30 @@
                                     id: event.id
                                 };
                             });
-                            successCallback(events);  // Return events to FullCalendar
+                            successCallback(events);
                         }
                     });
                 },
-
-                // Allow adding events by clicking on the calendar
                 selectable: true,
-                select: function(info) {
-                    $('#eventModal').show();  // Show the event form modal
-                    $('#start_time').val(info.startStr);  // Set default start time
-                    $('#end_time').val(info.endStr);  // Set default end time
+                select: function (info) {
+                    $('#eventModal').show();
+                    $('#start_time').val(info.startStr);
+                    $('#end_time').val(info.endStr);
                 },
-
-                // Allow editing and deleting events on click
-                eventClick: function(info) {
+                eventClick: function (info) {
                     $('#eventModal').show();
                     $('#eventName').val(info.event.title);
-                    $('#start_time').val(info.event.start.toISOString().slice(0, 16));  // Format ISO datetime for input
+                    $('#start_time').val(info.event.start.toISOString().slice(0, 16));
                     $('#end_time').val(info.event.end.toISOString().slice(0, 16));
                     $('#description').val(info.event.extendedProps.description);
-                    $('#eventId').val(info.event.id);  // Set hidden event ID
+                    $('#eventId').val(info.event.id);
 
-                    // Event deletion
-                    $('#deleteEventBtn').show().off('click').on('click', function() {
+                    $('#deleteEventBtn').show().off('click').on('click', function () {
                         $.ajax({
                             url: '/api/events/' + info.event.id,
                             method: 'DELETE',
-                            success: function() {
-                                calendar.refetchEvents();  // Reload events
+                            success: function () {
+                                calendar.refetchEvents();
                                 $('#eventModal').hide();
                             }
                         });
@@ -145,13 +198,10 @@
                 }
             });
 
-            // Render the calendar
             calendar.render();
 
-            // Form submission for adding/updating events
-            $('#eventForm').on('submit', function(e) {
-                e.preventDefault();  // Prevent the form from submitting normally
-
+            $('#eventForm').on('submit', function (e) {
+                e.preventDefault();
                 var eventData = {
                     name: $('#eventName').val(),
                     start_time: $('#start_time').val(),
@@ -161,31 +211,33 @@
 
                 var eventId = $('#eventId').val();
                 if (eventId) {
-                    // Update an existing event
                     $.ajax({
-                        url: '/api/events/' + eventId,  // Update event route
+                        url: '/api/events/' + eventId,
                         method: 'PUT',
                         data: eventData,
-                        success: function(data) {
-                            calendar.refetchEvents();  // Reload events
+                        success: function () {
+                            calendar.refetchEvents();
                             $('#eventModal').hide();
                         }
                     });
                 } else {
-                    // Create a new event
                     $.ajax({
-                        url: '/api/events',  // Create event route
+                        url: '/api/events',
                         method: 'POST',
                         data: eventData,
-                        success: function(data) {
-                            calendar.refetchEvents();  // Reload events
+                        success: function () {
+                            calendar.refetchEvents();
                             $('#eventModal').hide();
                         }
                     });
                 }
             });
+
+            $('#closeModalBtn').on('click', function () {
+                $('#eventModal').hide();
+            });
         });
     </script>
-    
+
 </body>
 </html>
