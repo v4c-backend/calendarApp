@@ -1,8 +1,7 @@
 # Calendar App 📅
 Description
 A simple and intuitive Calendar Application built to manage events. This app is designed to offer user-friendly navigation
-![image alt](![image](https://github.com/user-attachments/assets/120db99d-f74b-4cc3-9074-e487e308aabf)
-)
+![image alt](https://github.com/v4c-backend/calendarApp/blob/main/Screenshot%20(15).png?raw=true)
 # Features
 📆 Event Management: Create, update, and delete events.
 🕒 Time Management: View schedules by day, week, or month.
